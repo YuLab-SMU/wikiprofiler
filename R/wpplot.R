@@ -14,32 +14,14 @@ wpplot <- function(ID) {
 }
 
 
-svg2tempfile <- function(svg) {
-    f <- tempfile(fileext = '.svg')
-    cat(svg, file = f)
-    return(f)
-}
-
-print.wpplot <- function(x, ...) {
-    browseURL(svg2tempfile(x$svg))
-}
-
-colorb<-function(Expression,low = "blue", high="red"){
-  scaleExpr<-(Expression-min(Expression)) / diff(range(Expression)) #0-1
-  scaleExpr<-round(scaleExpr,2) * 1000 + 1 #1-(n+1)
-  colorB2R <- colorRampPalette(colors = c(low, high)) 
-  colorB2R(1001)[sort(scaleExpr)]
-}
-
 wp_bgfill <- function(p, value, low="blue", high="red", legend = TRUE) {
   # node number
   n <- length(value)
-  #最小的表达量向下向10的倍数取整
+
   mini <- min(value) %/% 10 * 10
-  #最大的表达量向上向10的倍数取整
   maxi <- ceiling(max(value)/10) * 10
   colornum <- (maxi-mini) / 10
-  #颜色序列
+
   colorbar <- colorb(value, low, high)
   color <- colorbar[order(Expression)]
 
@@ -50,15 +32,14 @@ wp_bgfill <- function(p, value, low="blue", high="red", legend = TRUE) {
     p$svg <- replace_bg2(p$svg, pos, color[i])
   }
 
-  #legend位置
+
   rectY<-seq(from = 50,by = 20,length.out = colornum)
-  rectY<-rev(rectY)  #把向量反转一下
+  rectY<-rev(rectY) 
   textY<-seq(from = 53,by = 20,length.out = colornum+1)
-  #legend刻度
+
   textele<-seq(from = maxi,to = mini,by = -10)
 
     if (legend) {
-        #加legend
         for (i in 1:colornum) {
             temp<-grep("></svg",p$svg)
             p$svg[temp]<-sub("</svg",paste("><rect x=\"30\" y=\"",rectY[i],"\" width=\"30\" height=\"20\" style=\"fill:",colorbar[i],"\"/></svg",sep = ""),p$svg[temp])
@@ -96,44 +77,6 @@ wp_shadowtext <- function(p, bg.r = 2, bg.col = "white") {
     return(p)
 }
 
-svg_halos <- function(svg, pos, gene) {
-    
-      svg[pos-1] <- paste(
-          sub("fill:black; stroke:none;", 
-            "\" class=\"halo",
-            svg[pos-1]),
-        sub("/>",
-            paste(">",gene,"</text>",sep=""),
-            svg[pos-1]
-        ))
-    return(svg)
-}
-
-svg_halos2 <- function(svg, positions, gene) {
-    for (pos in positions) {
-        svg <- svg_halos(svg, pos, gene)
-    }
-    return(svg)
-}
-
-replace_bg <- function(svg, position, color) {
-    j <- rev(grep("<g", svg[1:position]))[1]
-
-    replace <- sub("fill:.+;.+",paste("fill:",color,
-        "; text-rendering:geometricPrecision; stroke:white;\"",sep = ""),
-        svg[j])
-    
-    svg[j] <- replace
-    return(svg) 
-}
-
-replace_bg2 <- function(svg, positions, color) {
-    for (position in positions) {
-        svg <- replace_bg(svg, position, color)
-    }
-    return(svg) 
-}
-
 
 wpsave <- function(p, file, width=NULL, height=NULL) {
     fileext <- sub(".*(\\..+)", "\\1", file)
@@ -153,11 +96,3 @@ wpsave <- function(p, file, width=NULL, height=NULL) {
 
 
 
-##' @importFrom ggplotify as.grob
-##' @method as.grob wpplot
-##' @importFrom grid rasterGrob
-as.grob.wpplot <- function(plot, ...) {
-    f <- svg2tempfile(plot$svg)
-    p <- rsvg::rsvg_nativeraster(f) 
-    rasterGrob(p)
-}
