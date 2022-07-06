@@ -1,13 +1,13 @@
 svg2tempfile <- function(svg) {
-  f <- tempfile(fileext = '.svg') #生成扩展名为.svg的文件名
-  cat(svg, file = f) #将变量svg的内容输入到文件中
+  f <- tempfile(fileext = '.svg') 
+  cat(svg, file = f) 
   return(f)
 }
 
 #' @import grDevices
 
-colorb<-function(Expression,low = "blue", high="red"){    #颜色序列生成函数
-  scaleExpr<-(Expression-min(Expression)) / diff(range(Expression)) #0-1
+colorb<-function(Expression,low = "blue", high="red"){    
+  scaleExpr<-(Expression-min(Expression)) / diff(range(Expression)) 
   scaleExpr<-round(scaleExpr,2) * 1000 + 1 #1-(n+1)
   colorB2R <- colorRampPalette(colors = c(low, high))
   colorB2R(1001)[sort(scaleExpr)]
