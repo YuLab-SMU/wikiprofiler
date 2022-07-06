@@ -1,7 +1,9 @@
+
 ##' @method print wpplot
+##' @import utils
 ##' @export
 print.wpplot <- function(x, ...) {
-    browseURL(svg2tempfile(x$svg))
+  browseURL(svg2tempfile(x$svg))
 }
 
 
@@ -9,7 +11,7 @@ print.wpplot <- function(x, ...) {
 ##' @method as.grob wpplot
 ##' @importFrom grid rasterGrob
 as.grob.wpplot <- function(plot, ...) {
-    f <- svg2tempfile(plot$svg)
-    p <- rsvg::rsvg_nativeraster(f) 
-    rasterGrob(p)
+  f <- svg2tempfile(plot$svg)
+  p <- rsvg::rsvg_nativeraster(f)
+  rasterGrob(p)
 }
