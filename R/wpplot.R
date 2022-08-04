@@ -108,11 +108,11 @@ wp_shadowtext <- function(p, bg.r = 2, bg.col = "white") {
 wpsave <- function(p, file, width=NULL, height=NULL) {
   fileext <- sub(".*(\\..+)", "\\1", file)
   f <- svg2tempfile(p$svg)
-  if (fileext == 'svg') {
+  if (fileext == '.svg') {
     rsvg::rsvg_svg(f, file = file, width = width, height = height)
-  } else if (fileext == 'pdf') {
+  } else if (fileext == '.pdf') {
     rsvg::rsvg_pdf(f, file = file, width = width, height = height)
-  } else if (fileext == 'png') {
+  } else if (fileext == '.png') {
     rsvg::rsvg_png(f, file = file, width = width, height = height)
   } else {
     stop("file type not supported")
