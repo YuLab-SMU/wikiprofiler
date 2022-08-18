@@ -6,13 +6,16 @@ svg2tempfile <- function(svg) {
 
 #' @import grDevices
 
-colorb<-function(Expression,low = "blue", high="red"){    
+colorb<-function(Expression,low = "blue", high = "red"){    
   scaleExpr<-(Expression-min(Expression)) / diff(range(Expression)) 
-  scaleExpr<-round(scaleExpr,2) * 1000 + 1 #1-(n+1)
+  scaleExpr<-round(scaleExpr,2) * 1000 + 1 #1-1001
   colorB2R <- colorRampPalette(colors = c(low, high))
   colorB2R(1001)[sort(scaleExpr)]
 }
 
+legend_generator <- function(low = "blue", high = "red"){
+  colorRampPalette(colors = c(low, high))(1001)[c(1,126,251,376,501,626,751,826,1001)]
+}
 
 svg_halos <- function(svg, pos, gene) {
 
@@ -26,6 +29,7 @@ svg_halos <- function(svg, pos, gene) {
     ))
   return(svg)
 }
+
 
 svg_halos2 <- function(svg, positions, gene) {
   for (pos in positions) {
