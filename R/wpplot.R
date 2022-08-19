@@ -34,9 +34,10 @@ wp_bgfill <- function(p, value, low="blue", high="red", legend = TRUE) {
   maxi <- ceiling(max(value)/10) * 10
   colornum <- (maxi-mini) / 10
 
-  colorbar <- colorb(value, low, high)
+  colorbar <- colorb(value, low, high) 
   color <- colorbar[order(value)]
-
+  legendcolor <- legend_generator(low, high)
+  
   genes <- names(value)
 
   for (i in seq_along(genes)) {
@@ -45,19 +46,18 @@ wp_bgfill <- function(p, value, low="blue", high="red", legend = TRUE) {
   }
 
 
-  rectY<-seq(from = 50,by = 20,length.out = colornum)
+  rectY<-seq(from = 50,by = 20,length.out = 9)
   rectY<-rev(rectY)
-  textY<-seq(from = 53,by = 20,length.out = colornum+1)
+  textele<-pretty(value, 10)
+  textY<-seq(from = 53,by = 20,length.out = length(textele))
 
-  textele<-seq(from = maxi,to = mini,by = -10)
-
-  if (legend) {
-    for (i in 1:colornum) {
+  if (legend) {      
+    for (i in 1:9) {
       temp<-grep("></svg",p$svg)
-      p$svg[temp]<-sub("</svg",paste("><rect x=\"30\" y=\"",rectY[i],"\" width=\"30\" height=\"20\" style=\"fill:",colorbar[i],"\"/></svg",sep = ""),p$svg[temp])
+      p$svg[temp]<-sub("</svg",paste("><rect x=\"30\" y=\"",rectY[i],"\" width=\"30\" height=\"20\" style=\"fill:",legendcolor[i],"\"/></svg",sep = ""),p$svg[temp])
     }
 
-    for (i in 1:(colornum+1)) {
+    for (i in 1:10) {
       temp<-grep("></svg",p$svg)
       p$svg[temp]<-sub("</svg",paste("<text x=\"70\" y=\"",textY[i],"\" style=\"font-size:10; fill:black; stroke:none\">",textele[i],"</text></svg",sep = ""),p$svg[temp])
     }
