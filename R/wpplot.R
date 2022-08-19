@@ -48,9 +48,8 @@ wp_bgfill <- function(p, value, low="blue", high="red", legend = TRUE) {
 
   rectY<-seq(from = 50,by = 20,length.out = 9)
   rectY<-rev(rectY)
-  textY<-seq(from = 53,by = 20,length.out = 10)
-
-  textele<-round(seq(from = max(value),to = min(value),length.out = 10),2)
+  textele<-pretty(value, 10)
+  textY<-seq(from = 53,by = 20,length.out = length(textele))
 
   if (legend) {      
     for (i in 1:9) {
