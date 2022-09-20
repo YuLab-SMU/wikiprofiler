@@ -6,15 +6,23 @@ svg2tempfile <- function(svg) {
 
 #' @import grDevices
 
-colorb<-function(Expression,low = "blue", high = "red"){    
-  scaleExpr<-(Expression-min(Expression)) / diff(range(Expression)) 
-  scaleExpr<-round(scaleExpr,2) * 1000 + 1 #1-1001
-  colorB2R <- colorRampPalette(colors = c(low, high))
-  colorB2R(1001)[sort(scaleExpr)]
+colorb<-function(Expression,low = "blue", high = "red"){
+  Expression_low <- Expression[which(Expression <= 0)]
+  Expression_high <- Expression[which(Expression > 0)]
+  scaleExpr_low <- (Expression_low-min(Expression_low)) / diff(range(Expression_low)) 
+  scaleExpr_low <- round(scaleExpr_low,2) * 1000 + 1 #1-1001
+  scaleExpr_high <- (Expression_high-min(Expression_high)) / diff(range(Expression_high)) 
+  scaleExpr_high <- round(scaleExpr_high,2) * 1000 + 1 #1-1001
+  colorB2R_low <- colorRampPalette(colors = c(low, 'white'))
+  colorB2R_high <- colorRampPalette(colors = c('white', high))
+  c(colorB2R_low(1001)[sort(scaleExpr_low)], colorB2R_high(1001)[sort(scaleExpr_high)])
 }
 
-legend_generator <- function(low = "blue", high = "red"){
-  colorRampPalette(colors = c(low, high))(1001)[c(1,126,251,376,501,626,751,826,1001)]
+legend_generator <- function(value, low = "blue", high = "red"){
+  temp <- pretty(value, 4)
+  seq1 <- ceiling(seq(from = 1, to = 1001, length.out = length(temp[which(temp <= 0)])))
+  seq2 <- ceiling(seq(from = 1, to = 1001, length.out = length(temp[which(temp >= 0)])))
+  c(colorRampPalette(colors = c(low, 'white'))(1001)[seq1], colorRampPalette(color = c('white', high))(1001)[seq2[-1]])
 }
 
 svg_halos <- function(svg, pos, gene) {
