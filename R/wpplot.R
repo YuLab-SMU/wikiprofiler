@@ -27,9 +27,7 @@ wpplot <- function(ID) {
 #' @param legend Whether you need legend.
 #' @export
 
-wp_bgfill <- function(p, value, low="blue", high="red", legend = TRUE) {
-  n <- length(value)
-
+wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE) {
   mini <- min(value) %/% 10 * 10
   maxi <- ceiling(max(value)/10) * 10
   colornum <- (maxi-mini) / 10
@@ -39,7 +37,7 @@ wp_bgfill <- function(p, value, low="blue", high="red", legend = TRUE) {
   legendcolor <- legend_generator(value, low, high)
   
   genes <- names(value)
-
+  
   for (i in seq_along(genes)) {
     pos <- grep(genes[i], p$svg)
     p$svg <- replace_bg2(p$svg, pos, color[i])
@@ -49,17 +47,21 @@ wp_bgfill <- function(p, value, low="blue", high="red", legend = TRUE) {
   rectY<-seq(from = 50,by = 20,length.out = 6)
   rectY<-rev(rectY)
   textele<-rev(pretty(value, 4))
-  textY<-seq(from = 63,by = 20,length.out = length(textele))
-
-  if (legend) {      
-    for (i in 1:6) {
-      temp<-grep("></svg",p$svg)
-      p$svg[temp]<-sub("</svg",paste("><rect x=\"30\" y=\"",rectY[i],"\" width=\"30\" height=\"20\" style=\"fill:",legendcolor[i],"\"/></svg",sep = ""),p$svg[temp])
-    }
-
-    for (i in 1:6) {
-      temp<-grep("></svg",p$svg)
+  textY<-seq(from = 65,by = 24,length.out = length(textele))
+  scalelineY<-seq(from = 62,by = 23,length.out = length(textele))
+  
+  if(legend){
+    proportion <- paste(length(which(pretty(value, 4) > 0))*20, "%", sep = "")
+    temp<-grep("</svg",p$svg)
+    p$svg[temp]<-sub("</svg",paste("<defs><linearGradient id=\"grad1\" x1=\"0%\" y1=\"0%\" x2=\"0%\" y2=\"100%\"><stop offset=\"0%\" style=\"stop-color:",high,";stop-opacity:1\"></stop><stop offset=\"",proportion,"\" style=\"stop-color:","white",";stop-opacity:1\"></stop><stop offset=\"100%\" style=\"stop-color:",low,";stop-opacity:1\"></stop></linearGradient></defs><rect x=\"30\" y=\"60\" width =\"30\" height=\"120\" style=\"fill:url(#grad1 );stroke-width:0;stroke:black\"></rect></svg",sep = ""),p$svg[temp])
+    
+    for (i in 1:6){
+      temp<-grep("</svg",p$svg)
       p$svg[temp]<-sub("</svg",paste("<text x=\"70\" y=\"",textY[i],"\" style=\"font-size:10; fill:black; stroke:none\">",textele[i],"</text></svg",sep = ""),p$svg[temp])
+    }
+    for (i in 1:6){
+      temp<-grep("</svg",p$svg)
+      p$svg[temp]<-sub("</svg",paste("<rect width=\"3\" height=\"1\" x=\"57\" y=\"",scalelineY[i],"\" style=\"fill:white; stroke:none\"></rect></svg",sep = ""),p$svg[temp])
     }
   }
   p$geneExpr <- value
