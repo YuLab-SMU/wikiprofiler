@@ -4,16 +4,16 @@
 \alias{wp_bgfill}
 \title{Fill the background of gene with color according to amount of gene expression.}
 \usage{
-wp_bgfill(p, value, low = "blue", high = "red", legend = TRUE)
+wp_bgfill(p, value, high = "red", low = "blue", legend = TRUE)
 }
 \arguments{
 \item{p}{p is}
 
 \item{value}{value is the amount of expression.}
 
-\item{low}{The color of lowest gene.}
-
 \item{high}{The color of highest gene.}
+
+\item{low}{The color of lowest gene.}
 
 \item{legend}{Whether you need legend.}
 }
