@@ -22,6 +22,7 @@ wpplot <- function(ID) {
 #' @description Generate a color array.Fill the gene then generate the legend.
 #' @import org.Hs.eg.db
 #' @import stringr
+#' @import tidyverse
 #' @param p p is
 #' @param value value is the amount of expression.
 #' @param low The color of lowest gene.
