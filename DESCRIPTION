@@ -12,5 +12,6 @@ Imports:
   ggplotify,
   grDevices,
   gson,
-  rsvg
+  rsvg,
+  org.Hs.eg.db
 RoxygenNote: 7.2.1
