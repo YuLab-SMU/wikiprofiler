@@ -21,6 +21,7 @@ wpplot <- function(ID) {
 #' @title Fill the background of gene with color according to amount of gene expression.
 #' @description Generate a color array.Fill the gene then generate the legend.
 #' @import org.Hs.eg.db
+#' @import clusterProfiler
 #' @import stringr
 #' @import tidyverse
 #' @param p p is
