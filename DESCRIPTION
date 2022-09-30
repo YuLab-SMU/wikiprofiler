@@ -14,5 +14,6 @@ Imports:
   gson,
   rsvg,
   org.Hs.eg.db,
-  stringr
+  stringr,
+  tidyverse
 RoxygenNote: 7.2.1
