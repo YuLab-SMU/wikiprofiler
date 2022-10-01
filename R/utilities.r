@@ -51,15 +51,15 @@ svg_halos2 <- function(svg, positions, gene) {
 
 replace_bg <- function(svg, position, color) {
   j <- rev(grep("<g", svg[1:position]))[1]
-
+  
   replace <- sub(
     "fill:.+;.+", paste("fill:", color,
-      "; text-rendering:geometricPrecision; stroke:white;\"",
-      sep = ""
+                        "; text-rendering:geometricPrecision; stroke:white;\"",
+                        sep = ""
     ),
     svg[j]
   )
-
+  
   svg[j] <- replace
   return(svg)
 }
