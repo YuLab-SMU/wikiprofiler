@@ -23,7 +23,6 @@ wpplot <- function(ID) {
 #' @import org.Hs.eg.db
 #' @import clusterProfiler
 #' @import stringr
-#' @import tidyverse
 #' @param p p is
 #' @param value value is the amount of expression.
 #' @param low The color of lowest gene.
