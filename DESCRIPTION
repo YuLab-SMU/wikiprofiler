@@ -15,6 +15,5 @@ Imports:
   rsvg,
   org.Hs.eg.db,
   stringr,
-  tidyverse,
   clusterProfiler
 RoxygenNote: 7.2.1
