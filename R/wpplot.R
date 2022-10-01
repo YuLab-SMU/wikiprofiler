@@ -52,7 +52,7 @@ wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE) {
 
   rectY<-seq(from = 50,by = 20,length.out = 6)
   rectY<-rev(rectY)
-  textele<-rev(pretty(value, 4))
+  textele<-rev(pretty(c(min(value), max(value)), 4))
   textY<-seq(from = 65,by = 24,length.out = length(textele))
   scalelineY<-seq(from = 62,by = 23,length.out = length(textele))
   
