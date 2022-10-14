@@ -25,9 +25,13 @@ wpplot <- function(ID) {
 #' @param low The color of lowest gene.
 #' @param high The color of highest gene.
 #' @param legend Whether you need legend.
+#' @import org.Hs.eg.db
 #' @export
 
 wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE) {
+  if(!all(names(value) %in% eg2symbol$symbol)){
+    return('The names of genes must be SYMBOL!')
+  }
   mini <- min(value) %/% 10 * 10
   maxi <- ceiling(max(value)/10) * 10
   colornum <- (maxi-mini) / 10
