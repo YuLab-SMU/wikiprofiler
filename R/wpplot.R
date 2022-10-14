@@ -26,6 +26,7 @@ wpplot <- function(ID) {
 #' @param high The color of highest gene.
 #' @param legend Whether you need legend.
 #' @import org.Hs.eg.db
+#' @import BiocGenerics
 #' @export
 
 wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE) {
