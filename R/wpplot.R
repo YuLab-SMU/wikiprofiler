@@ -29,6 +29,7 @@ wpplot <- function(ID) {
 #' @export
 
 wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE) {
+  eg2symbol <- toTable(org.Hs.egSYMBOL)
   if(!all(names(value) %in% eg2symbol$symbol)){
     return('The names of genes must be SYMBOL!')
   }
