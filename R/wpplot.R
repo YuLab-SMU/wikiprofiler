@@ -20,9 +20,6 @@ wpplot <- function(ID) {
 
 #' @title Fill the background of gene with color according to amount of gene expression.
 #' @description Generate a color array.Fill the gene then generate the legend.
-#' @import org.Hs.eg.db
-#' @import clusterProfiler
-#' @import stringr
 #' @param p p is
 #' @param value value is the amount of expression.
 #' @param low The color of lowest gene.
@@ -31,9 +28,6 @@ wpplot <- function(ID) {
 #' @export
 
 wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE) {
-  if(str_detect(names(value)[1], "^[0-9]*$")){  
-   names(value)<-bitr(names(value),fromType = "ENTREZID", toType = "SYMBOL", OrgDb = org.Hs.eg.db)[,2]
-  }
   mini <- min(value) %/% 10 * 10
   maxi <- ceiling(max(value)/10) * 10
   colornum <- (maxi-mini) / 10
@@ -45,10 +39,8 @@ wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE) {
   genes <- names(value)
   
   for (i in seq_along(genes)) {
-    if(!is.na(genes[i]))
-      pos <- grep(genes[i], p$svg)
-    if(length(pos) != 0)
-      p$svg <- replace_bg2(p$svg, pos, color[i])
+    pos <- grep(genes[i], p$svg)
+    p$svg <- replace_bg2(p$svg, pos, color[i])
   }
 
 
