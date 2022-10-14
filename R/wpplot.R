@@ -31,7 +31,8 @@ wpplot <- function(ID) {
 wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE) {
   eg2symbol <- toTable(org.Hs.egSYMBOL)
   if(!all(names(value) %in% eg2symbol$symbol)){
-    return('The names of genes must be SYMBOL!')
+    print('The names of genes must be SYMBOL!')
+    return p
   }
   mini <- min(value) %/% 10 * 10
   maxi <- ceiling(max(value)/10) * 10
