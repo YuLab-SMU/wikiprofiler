@@ -30,9 +30,9 @@ wpplot <- function(ID) {
 #' @export
 
 wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE) {
-  eg2symbol <- toTable(org.Hs.egSYMBOL)
-  if(!all(names(value) %in% eg2symbol$symbol)){
-    message('The names of genes must be SYMBOL!')
+  SYMBOLS <- sub('      ', '',sub('>', '',sub('</text', '',Pathway$svg[grep('</text', Pathway$svg)])))
+  if(!all(names(value) %in% SYMBOLS)){
+    message('Input genes can not match genes in wikipathway!The names of genes must be SYMBOL!')
     return(p)
   }
   mini <- min(value) %/% 10 * 10
