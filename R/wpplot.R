@@ -32,7 +32,7 @@ wpplot <- function(ID) {
 wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE) {
   SYMBOLS <- sub('      ', '',sub('>', '',sub('</text', '',Pathway$svg[grep('</text', Pathway$svg)])))
   if(!all(names(value) %in% SYMBOLS)){
-    message('Input genes can not match genes in wikipathway!The names of genes must be SYMBOL!')
+    message(paste('Input genes can not match genes in ', p$ID,'!The names of genes must be SYMBOL!', sep = ''))
     return(p)
   }
   mini <- min(value) %/% 10 * 10
