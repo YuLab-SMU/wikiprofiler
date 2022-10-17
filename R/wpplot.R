@@ -25,12 +25,13 @@ wpplot <- function(ID) {
 #' @param low The color of lowest gene.
 #' @param high The color of highest gene.
 #' @param legend Whether you need legend.
-#' @import org.Hs.eg.db
-#' @import BiocGenerics
+# @import org.Hs.eg.db
+# @import BiocGenerics
 #' @export
 
 wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE) {
-  SYMBOLS <- sub('      ', '',sub('>', '',sub('</text', '',Pathway$svg[grep('</text', Pathway$svg)])))
+  SYMBOLS <- sub('\\s+', '', sub('>', '', sub('</text', '', p$svg[grep('</text', p$svg)])))
+
   if(!all(names(value) %in% SYMBOLS)){
     message(paste('Input genes can not match genes in ', p$ID,'!The names of genes must be SYMBOL!', sep = ''))
     return(p)
