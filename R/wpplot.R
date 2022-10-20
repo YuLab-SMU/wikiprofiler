@@ -29,7 +29,10 @@ wpplot <- function(ID) {
 # @import BiocGenerics
 #' @export
 
-wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE, legend_x = 0, legend_y = 0) {
+wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE, legend_x = 0.001, legend_y = 0.06) {
+  if(legend_x < 0 || legend_x > 1 || legend_y < 0 || legend_y > 1){
+    message('Parameters legend_x and legend_y must be numbers between 0 to 1!')
+  }
   SYMBOLS <- sub('\\s+', '', sub('>', '', sub('</text', '', p$svg[grep('</text', p$svg)])))
   if(!all(names(value) %in% SYMBOLS)){
     message(paste('Input genes can not match genes in ', p$ID,'!The names of genes must be SYMBOL!', sep = ''))
@@ -57,8 +60,11 @@ wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE, legend_x 
   incrementY <- svg_height * legend_y
   if(incrementX > svg_width - 48)
     incrementX <- svg_width - 48
-  if(incrementY > svg_height - 122)
+  
+  if(incrementY > svg_height - 122){
     incrementY <- svg_height - 122
+  }else if(incrementY < 3)
+    incrementY <- 3
   
   textele <- rev(pretty(value, 4))   
   legendX <- 0 + incrementX
