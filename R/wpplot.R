@@ -29,7 +29,7 @@ wpplot <- function(ID) {
 # @import BiocGenerics
 #' @export
 
-wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE, legend_x = 0.001, legend_y = 0.06) {
+wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE, legend_x = 0.001, legend_y = 0.94) {
   if(legend_x < 0 || legend_x > 1 || legend_y < 0 || legend_y > 1){
     message('Parameters legend_x and legend_y must be numbers between 0 to 1!')
   }
@@ -57,7 +57,7 @@ wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE, legend_x 
   svg_height <- as.numeric(strsplit(strsplit(strsplit(p$svg[4], 'width=\"')[[1]][2], '\" height=\"')[[1]][2], '\"')[[1]][1])
   
   incrementX <- svg_width * legend_x
-  incrementY <- svg_height * legend_y
+  incrementY <- svg_height * (1 - legend_y)
   if(incrementX > svg_width - 48)
     incrementX <- svg_width - 48
   
