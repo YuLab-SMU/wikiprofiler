@@ -34,8 +34,10 @@ wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE, legend_x 
     message('Parameters legend_x and legend_y must be numbers between 0 to 1!')
   }
   SYMBOLS <- sub('\\s+', '', sub('>', '', sub('</text', '', p$svg[grep('</text', p$svg)])))
-  if(!all(names(value) %in% SYMBOLS)){
-    message(paste('Input genes can not match genes in ', p$ID,'!The names of genes must be SYMBOL!', sep = ''))
+  SYMBOLS <- SYMBOLS[is.na(suppressWarnings(as.numeric(SYMBOLS)))]
+
+  if(!any(names(value) %in% SYMBOLS)){
+    message("Please make sure the input gene ID type is 'SYMBOL'")
     return(p)
   }
   mini <- min(value) %/% 10 * 10

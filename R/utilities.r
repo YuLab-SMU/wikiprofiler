@@ -65,8 +65,13 @@ replace_bg <- function(svg, position, color) {
 }
 
 replace_bg2 <- function(svg, positions, color) {
+  if (is.null(positions) || is.na(positions) || length(positions) == 0) {
+    return(svg)
+  }
+
   for (position in positions) {
     svg <- replace_bg(svg, position, color)
   }
+  
   return(svg)
 }
