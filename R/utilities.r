@@ -7,8 +7,9 @@ svg2tempfile <- function(svg) {
 #' @import grDevices
 
 colorb <- function(Expression, low = "blue", high = "red") {
-  Expression_low <- Expression[which(Expression <= 0)]
-  Expression_high <- Expression[which(Expression > 0)]
+  zero_scale_line <- max(Expression) - min(Expression)
+  Expression_low <- Expression[which(Expression <= zero_scale_line)]
+  Expression_high <- Expression[which(Expression > zero_scale_line)]
   scaleExpr_low <- (Expression_low - min(Expression_low)) / diff(range(Expression_low))
   scaleExpr_low <- round(scaleExpr_low, 2) * 1000 + 1 # 1-1001
   scaleExpr_high <- (Expression_high - min(Expression_high)) / diff(range(Expression_high))
@@ -65,8 +66,13 @@ replace_bg <- function(svg, position, color) {
 }
 
 replace_bg2 <- function(svg, positions, color) {
+  if (is.null(positions) || is.na(positions) || length(positions) == 0) {
+    return(svg)
+  }
+
   for (position in positions) {
     svg <- replace_bg(svg, position, color)
   }
+  
   return(svg)
 }
