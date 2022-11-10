@@ -7,8 +7,12 @@ svg2tempfile <- function(svg) {
 #' @import grDevices
 
 colorb <- function(Expression, low = "blue", high = "red") {
-  Expression_low <- Expression[which(Expression <= 0)]
-  Expression_high <- Expression[which(Expression > 0)]
+  zero_scale_line <- 0
+  if(all(pretty(Expression, 4) >= 0) || all(pretty(Expression, 4) <= 0)){
+    zero_scale_line <- pretty(Expression,4)[4]
+  }
+  Expression_low <- Expression[which(Expression <= zero_scale_line)]
+  Expression_high <- Expression[which(Expression > zero_scale_line)]
   scaleExpr_low <- (Expression_low - min(Expression_low)) / diff(range(Expression_low))
   scaleExpr_low <- round(scaleExpr_low, 2) * 1000 + 1 # 1-1001
   scaleExpr_high <- (Expression_high - min(Expression_high)) / diff(range(Expression_high))
