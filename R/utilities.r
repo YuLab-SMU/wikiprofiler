@@ -9,7 +9,7 @@ svg2tempfile <- function(svg) {
 colorb <- function(Expression, low = "blue", high = "red") {
   zero_scale_line <- 0
   if(all(pretty(Expression, 4) >= 0) || all(pretty(Expression, 4) <= 0)){
-    zero_scale_line <- max(Expression) - min(Expression)
+    zero_scale_line <- pretty(Expression,4)[4]
   }
   Expression_low <- Expression[which(Expression <= zero_scale_line)]
   Expression_high <- Expression[which(Expression > zero_scale_line)]
