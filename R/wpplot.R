@@ -34,8 +34,10 @@ wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE, legend_x 
     message('Parameters legend_x and legend_y must be numbers between 0 to 1!')
   }
   SYMBOLS <- sub('\\s+', '', sub('>', '', sub('</text', '', p$svg[grep('</text', p$svg)])))
-  if(!all(names(value) %in% SYMBOLS)){
-    message(paste('Input genes can not match genes in ', p$ID,'!The names of genes must be SYMBOL!', sep = ''))
+  SYMBOLS <- SYMBOLS[is.na(suppressWarnings(as.numeric(SYMBOLS)))]
+
+  if(!any(names(value) %in% SYMBOLS)){
+    message("Please make sure the input gene ID type is 'SYMBOL'")
     return(p)
   }
   mini <- min(value) %/% 10 * 10
@@ -75,7 +77,8 @@ wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE, legend_x 
   scalelineY <- seq(from = 2,to = 118,length.out = length(textele)) +incrementY
   
   if(legend){
-    proportion <- paste((length(which(pretty(value, 4) >= 0))/length(pretty(value, 4))*116 + 2)/120*100, "%", sep = "")
+    zero_scale_line <- max(value) - min(value)
+    proportion <- paste((length(which(pretty(value, 4) >= zero_scale_line))/length(pretty(value, 4))*116 + 2)/120*100, "%", sep = "")
     temp<-grep("</svg",p$svg)
     p$svg[temp]<-sub("</svg",paste("<defs><linearGradient id=\"grad1\" x1=\"0%\" y1=\"0%\" x2=\"0%\" y2=\"100%\"><stop offset=\"0%\" style=\"stop-color:",high,";stop-opacity:1\"></stop><stop offset=\"",proportion,"\" style=\"stop-color:","white",";stop-opacity:1\"></stop><stop offset=\"100%\" style=\"stop-color:",low,";stop-opacity:1\"></stop></linearGradient></defs><rect x=\"",legendX,"\" y=\"",legendY,"\" width =\"30\" height=\"120\" style=\"fill:url(#grad1 );stroke-width:0;stroke:black\"></rect></svg",sep = ""),p$svg[temp])
     
