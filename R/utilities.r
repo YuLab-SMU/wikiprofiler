@@ -7,19 +7,28 @@ svg2tempfile <- function(svg) {
 #' @import grDevices
 
 colorb <- function(Expression, low = "blue", high = "red") {
-  zero_scale_line <- 0
-  if(all(pretty(Expression, 4) >= 0) || all(pretty(Expression, 4) <= 0)){
-    zero_scale_line <- pretty(Expression,4)[4]
-  }
+  zero_scale_line <- find_zero_scale(Expression)
+  textele <- pretty(Expression, 4)
+  textele_low <- textele[which(textele <= zero_scale_line)]
+  textele_high <- textele[which(textele > zero_scale_line)]
+  
   Expression_low <- Expression[which(Expression <= zero_scale_line)]
   Expression_high <- Expression[which(Expression > zero_scale_line)]
-  scaleExpr_low <- (Expression_low - min(Expression_low)) / diff(range(Expression_low))
+  scaleExpr_low <- (Expression_low - min(textele_low)) / (zero_scale_line - min(textele_low))
+  scaleExpr_high <- (Expression_high - zero_scale_line) / (max(textele_high) - zero_scale_line)
   scaleExpr_low <- round(scaleExpr_low, 2) * 1000 + 1 # 1-1001
-  scaleExpr_high <- (Expression_high - min(Expression_high)) / diff(range(Expression_high))
   scaleExpr_high <- round(scaleExpr_high, 2) * 1000 + 1 # 1-1001
   colorB2R_low <- colorRampPalette(colors = c(low, "white"))
   colorB2R_high <- colorRampPalette(colors = c("white", high))
   c(colorB2R_low(1001)[sort(scaleExpr_low)], colorB2R_high(1001)[sort(scaleExpr_high)])
+}
+
+find_zero_scale <- function(value){
+  zero_scale_line <- 0
+  if(all(pretty(value, 4) > 0) || all(pretty(value, 4) < 0)){
+    zero_scale_line <- pretty(value, 4)[round(length(pretty(value, 4)) / 2)]
+  }
+  return(zero_scale_line)
 }
 
 legend_generator <- function(value, low = "blue", high = "red") {
@@ -55,24 +64,24 @@ svg_halos2 <- function(svg, positions, gene) {
 
 replace_bg <- function(svg, position, color) {
   j <- rev(grep("<g", svg[1:position]))[1]
-
+  
   replace <- sub(
     "fill:.+;.+", paste("fill:", color,
-      "; text-rendering:geometricPrecision; stroke:white;\"",
-      sep = ""
+                        "; text-rendering:geometricPrecision; stroke:white;\"",
+                        sep = ""
     ),
     svg[j]
   )
-
+  
   svg[j] <- replace
   return(svg)
 }
 
 replace_bg2 <- function(svg, positions, color) {
-  if (is.null(positions) || is.na(positions) || length(positions) == 0) {
+  if (is.null(positions[1]) || is.na(positions[1]) || length(positions[1]) == 0) {
     return(svg)
   }
-
+  
   for (position in positions) {
     svg <- replace_bg(svg, position, color)
   }
