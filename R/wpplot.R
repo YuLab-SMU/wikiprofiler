@@ -35,16 +35,18 @@ wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE, legend_x 
   }
   SYMBOLS <- sub('\\s+', '', sub('>', '', sub('</text', '', p$svg[grep('</text', p$svg)])))
   SYMBOLS <- SYMBOLS[is.na(suppressWarnings(as.numeric(SYMBOLS)))]
-
+  
   if(!any(names(value) %in% SYMBOLS)){
     message("Please make sure the input gene ID type is 'SYMBOL'")
     return(p)
   }
+  value <- value[names(value) %in% SYMBOLS]
+  
   mini <- min(value) %/% 10 * 10
   maxi <- ceiling(max(value)/10) * 10
   colornum <- (maxi-mini) / 10
   
-  colorbar <- colorb(value, low, high) 
+  colorbar <- colorb(value, low, high)
   color <- colorbar[order(value)]  
   legendcolor <- legend_generator(value, low, high)
   
@@ -68,7 +70,7 @@ wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE, legend_x 
   }else if(incrementY < 3)
     incrementY <- 3
   
-  textele <- rev(pretty(value, 4))   
+  textele <- rev(pretty(value, 4))  
   legendX <- 0 + incrementX
   legendY <- 0 + incrementY
   textX <- 40 + incrementX
@@ -77,12 +79,15 @@ wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE, legend_x 
   scalelineY <- seq(from = 2,to = 118,length.out = length(textele)) +incrementY
   
   if(legend){
-    zero_scale_line <- 0
-    if(all(pretty(value, 4) >= 0) || all(pretty(value, 4) <= 0)){
-      zero_scale_line <- pretty(value,4)[4]
-    }
-    proportion <- c('2%', '18%', '35%', '51%', '67%', '83%', '99%')
+    zero_scale_line <- find_zero_scale(value)
+    proportion <- seq(from = 2,to = 118,length.out = length(textele)) / 120
     proportion <- proportion[length(which(pretty(value, 4) >= zero_scale_line))]
+    if(max(pretty(value, 4)) == 0){
+      proportion <- '0%'
+    }
+    if(min(pretty(value, 4)) == 0){
+      proportion <- '100%'
+    }
     temp<-grep("</svg",p$svg)
     p$svg[temp]<-sub("</svg",paste("<defs><linearGradient id=\"grad1\" x1=\"0%\" y1=\"0%\" x2=\"0%\" y2=\"100%\"><stop offset=\"0%\" style=\"stop-color:",high,";stop-opacity:1\"></stop><stop offset=\"",proportion,"\" style=\"stop-color:","white",";stop-opacity:1\"></stop><stop offset=\"100%\" style=\"stop-color:",low,";stop-opacity:1\"></stop></linearGradient></defs><rect x=\"",legendX,"\" y=\"",legendY,"\" width =\"30\" height=\"120\" style=\"fill:url(#grad1 );stroke-width:0;stroke:black\"></rect></svg",sep = ""),p$svg[temp])
     
