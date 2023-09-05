@@ -7,7 +7,7 @@
 read.wp(file)
 }
 \arguments{
-\item{file}{wikipathway gmt file 
+\item{file}{wikipathway gmt file
 downloaded from 'https://wikipathways-data.wmcloud.org/current/gmt/'}
 }
 \value{

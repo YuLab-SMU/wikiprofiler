@@ -4,7 +4,15 @@
 \alias{wp_bgfill}
 \title{Fill the background of gene with color according to amount of gene expression.}
 \usage{
-wp_bgfill(p, value, high = "red", low = "blue", legend = TRUE)
+wp_bgfill(
+  p,
+  value,
+  high = "red",
+  low = "blue",
+  legend = TRUE,
+  legend_x = 0.001,
+  legend_y = 0.94
+)
 }
 \arguments{
 \item{p}{p is}
@@ -16,6 +24,10 @@ wp_bgfill(p, value, high = "red", low = "blue", legend = TRUE)
 \item{low}{The color of lowest gene.}
 
 \item{legend}{Whether you need legend.}
+
+\item{legend_x}{horizontal position of the legend}
+
+\item{legend_y}{vertical position of the legend}
 }
 \description{
 Generate a color array.Fill the gene then generate the legend.

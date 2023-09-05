@@ -1,16 +1,19 @@
 Package: wikiprofiler
 Type: Package
-Title: unknown
+Title: WikiPathway based Data Integration and Visualization 
 Version: 0.1.0
-Author: GuangChuang Yu
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: MIT + file LICENSE
-Encoding: UTF-8
+Authors@R: c(
+       person("Guangchuang", "Yu",     email = "guangchuangyu@gmail.com", role = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-6485-8781")),
+       person("Yihao", "Chen",       email = "olivercyh@foxmail.com",      role = "aut")
+       )
+Description: Queries online wikipathway graphics (SVG file) and allows mapping user data (e.g., expression values) on the graph. The package designs a grammar of graphic syntax that using pipe operator to add graphic layer.
 Imports:
   ggplotify,
   grDevices,
   gson,
   rsvg
-RoxygenNote: 7.2.1
+ByteCompile: true
+License: Artistic-2.0
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3

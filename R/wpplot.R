@@ -25,6 +25,8 @@ wpplot <- function(ID) {
 #' @param low The color of lowest gene.
 #' @param high The color of highest gene.
 #' @param legend Whether you need legend.
+#' @param legend_x horizontal position of the legend
+#' @param legend_y vertical position of the legend
 # @import org.Hs.eg.db
 # @import BiocGenerics
 #' @export
