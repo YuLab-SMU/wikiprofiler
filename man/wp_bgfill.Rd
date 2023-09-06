@@ -29,6 +29,9 @@ wp_bgfill(
 
 \item{legend_y}{vertical position of the legend}
 }
+\value{
+A 'wpplot' object
+}
 \description{
 Generate a color array.Fill the gene then generate the legend.
 }

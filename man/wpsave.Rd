@@ -2,19 +2,22 @@
 % Please edit documentation in R/wpplot.R
 \name{wpsave}
 \alias{wpsave}
-\title{Save svg picture in specific address.}
+\title{Save the 'wpplot' object to a file.}
 \usage{
 wpsave(p, file, width = NULL, height = NULL)
 }
 \arguments{
-\item{p}{A wpplot class variance.}
+\item{p}{A 'wpplot' object}
 
-\item{file}{Address where you want to save the svg.}
+\item{file}{the file to save the object}
 
-\item{width}{Width of svg.}
+\item{width}{Width of the figure}
 
-\item{height}{Height of svg.}
+\item{height}{Height of the figure}
+}
+\value{
+output the file and the input 'wpplot' object (invisible)
 }
 \description{
-Save svg picture in specific address.
+Save the 'wpplot' object to a file.
 }

@@ -13,6 +13,9 @@ wp_shadowtext(p, bg.r = 2, bg.col = "white")
 
 \item{bg.col}{The color of halo.}
 }
+\value{
+A 'wpplot' object
+}
 \description{
 Add use svghalo2 function to add halo.
 }

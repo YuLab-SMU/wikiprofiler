@@ -1,8 +1,10 @@
 #' @title Input specific wikipathways ID to get an output in class of wpplot.
 #' @description Use wikipathways ID to open a local svg file. Then extract related information from svg file and build a wpplot class variance.
 #' @param ID ID is wikipathways' ID.
+#' @return A 'wpplot' object
 #' @export
-
+#' @examples 
+#' wpplot('WP63_117935') 
 wpplot <- function(ID) {
   url <- paste0('https://www.wikipathways.org//wpi/wpi.php?action=',
                 'downloadFile&type=svg&pwTitle=Pathway:',
@@ -27,10 +29,10 @@ wpplot <- function(ID) {
 #' @param legend Whether you need legend.
 #' @param legend_x horizontal position of the legend
 #' @param legend_y vertical position of the legend
+#' @return A 'wpplot' object
 # @import org.Hs.eg.db
 # @import BiocGenerics
 #' @export
-
 wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE, legend_x = 0.001, legend_y = 0.94) {
   if(legend_x < 0 || legend_x > 1 || legend_y < 0 || legend_y > 1){
     message('Parameters legend_x and legend_y must be numbers between 0 to 1!')
@@ -112,8 +114,8 @@ wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE, legend_x 
 #' @param p An wpplot class variance.
 #' @param bg.r The width of halo.
 #' @param bg.col The color of halo.
+#' @return A 'wpplot' object
 #' @export
-
 wp_shadowtext <- function(p, bg.r = 2, bg.col = "white") {
   if (is.null(p$geneExpr)) return(p)
   
@@ -137,14 +139,15 @@ wp_shadowtext <- function(p, bg.r = 2, bg.col = "white") {
   return(p)
 }
 
-#' @title Save svg picture in specific address.
-#' @import rsvg
-#' @param p A wpplot class variance.
-#' @param file Address where you want to save the svg.
-#' @param width Width of svg.
-#' @param height Height of svg.
-#' @export
 
+#' @title Save the 'wpplot' object to a file.
+#' @param p A 'wpplot' object
+#' @param file the file to save the object
+#' @param width Width of the figure
+#' @param height Height of the figure
+#' @return output the file and the input 'wpplot' object (invisible)
+#' @import rsvg
+#' @export
 wpsave <- function(p, file, width=NULL, height=NULL) {
   fileext <- sub(".*(\\..+)", "\\1", file)
   f <- svg2tempfile(p$svg)
