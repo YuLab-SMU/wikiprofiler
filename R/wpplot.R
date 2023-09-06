@@ -9,7 +9,7 @@ wpplot <- function(ID) {
   url <- paste0('https://www.wikipathways.org//wpi/wpi.php?action=',
                 'downloadFile&type=svg&pwTitle=Pathway:',
                 ID)
-  svg <- readLines(url)
+  svg <- yulab.utils::yread(url)
   if (!any(grepl('<svg', svg[1:10]))) {
     stop("fail to read online wiki pathway file")
   }

@@ -11,7 +11,8 @@ Imports:
   ggplotify,
   grDevices,
   gson,
-  rsvg
+  rsvg,
+  yulab.utils
 ByteCompile: true
 License: Artistic-2.0
 Encoding: UTF-8
