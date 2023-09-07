@@ -4,7 +4,7 @@
 \alias{wpsave}
 \title{Save the 'wpplot' object to a file.}
 \usage{
-wpsave(p, file, width = NULL, height = NULL)
+wpsave(p, file, width = NULL, height = NULL, ...)
 }
 \arguments{
 \item{p}{A 'wpplot' object}
@@ -14,6 +14,8 @@ wpsave(p, file, width = NULL, height = NULL)
 \item{width}{Width of the figure}
 
 \item{height}{Height of the figure}
+
+\item{...}{additional parameter passed to 'ggsave'}
 }
 \value{
 output the file and the input 'wpplot' object (invisible)

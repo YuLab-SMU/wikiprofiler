@@ -145,21 +145,31 @@ wp_shadowtext <- function(p, bg.r = 2, bg.col = "white") {
 #' @param file the file to save the object
 #' @param width Width of the figure
 #' @param height Height of the figure
+#' @param ... additional parameter passed to 'ggsave'
 #' @return output the file and the input 'wpplot' object (invisible)
 #' @import rsvg
+#' @importFrom ggplot2 ggsave
 #' @export
-wpsave <- function(p, file, width=NULL, height=NULL) {
-  fileext <- sub(".*(\\..+)", "\\1", file)
-  f <- svg2tempfile(p$svg)
-  if (fileext == '.svg') {
-    rsvg::rsvg_svg(f, file = file, width = width, height = height)
-  } else if (fileext == '.pdf') {
-    rsvg::rsvg_pdf(f, file = file, width = width, height = height)
-  } else if (fileext == '.png') {
-    rsvg::rsvg_png(f, file = file, width = width, height = height)
-  } else {
-    stop("file type not supported")
-  }
+wpsave <- function(p, file, width=NULL, height=NULL, ...) {
+  # fileext <- sub(".*(\\..+)", "\\1", file)
+  # f <- svg2tempfile(p$svg)
+  # if (fileext == '.svg') {
+  #   rsvg::rsvg_svg(f, file = file, width = width, height = height)
+  # } else if (fileext == '.pdf') {
+  #   rsvg::rsvg_pdf(f, file = file, width = width, height = height)
+  # } else if (fileext == '.png') {
+  #   rsvg::rsvg_png(f, file = file, width = width, height = height)
+  # } else {
+  #   stop("file type not supported")
+  # }
   
+  g <- ggplotify::as.ggplot(p)
+  
+  ggplot2::ggsave(plot = g,
+    filename = file,
+    width = width,
+    height = height, 
+    ...)
+
   invisible(p)
 }

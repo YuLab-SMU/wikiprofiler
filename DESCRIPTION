@@ -1,18 +1,22 @@
 Package: wikiprofiler
 Type: Package
 Title: 'WikiPathway' Based Data Integration and Visualization 
-Version: 0.1.2
+Version: 0.1.2.001
 Authors@R: c(
        person("Guangchuang", "Yu",     email = "guangchuangyu@gmail.com", role = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-6485-8781")),
        person("Yihao", "Chen",       email = "olivercyh@foxmail.com",      role = "aut")
        )
 Description: Queries online 'WikiPathway' graphics and allows mapping user data (e.g., expression values) on the graph. The package designs a grammar of graphic syntax that using pipe operator to add graphic layer.
 Imports:
+  ggplot2,
   ggplotify,
   grDevices,
   gson,
   rsvg,
   yulab.utils
+Suggests:
+  digest,
+  fs
 ByteCompile: true
 License: Artistic-2.0
 Encoding: UTF-8

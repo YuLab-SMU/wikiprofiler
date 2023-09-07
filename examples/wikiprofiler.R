@@ -1,4 +1,3 @@
-```r
 library(clusterProfiler)
 library(wikiprofiler)
 
@@ -15,25 +14,10 @@ value <- setNames(geneList[de2[,1]], de2[,2])
 
 ID <- x$ID[1]
 
-p1 <- wpplot(ID)
-p1
-```
+p1 = wpplot(ID)
+p2 = p1 |> wp_bgfill(value, low='darkgreen', high='firebrick', legend_x = .9, legend_y = .95)
+p3 = p2 |> wp_shadowtext()
 
-![](examples/f1.png)
-
-
-```r
-p2 <- p1 |> wp_bgfill(value, low='darkgreen', high='firebrick', legend_x = .9, legend_y = .95)
-p2
-```
-
-![](examples/f2.png)
-
-```r
-p3 <- p2 |> wp_shadowtext()
-p3
-```
-
-![](examples/f3.png)
-
-
+wpsave(p1, 'f1.png', width=10, height=7)
+wpsave(p2, 'f2.png', width=10, height=7)
+wpsave(p3, 'f3.png', width=10, height=7)
