@@ -24,3 +24,11 @@ as.grob.wpplot <- function(plot, ...) {
   p <- rsvg::rsvg_nativeraster(f)
   rasterGrob(p)
 }
+
+##' @method grid.draw wpplot
+##' @importFrom grid grid.draw
+##' @export
+grid.draw.wpplot <- function(x, recording = TRUE) {
+  grid::grid.draw(as.grob.wpplot(x), recording = recording)
+}
+

@@ -173,3 +173,8 @@ wpsave <- function(p, file, width=NULL, height=NULL, ...) {
 
   invisible(p)
 }
+
+
+##' @importFrom ggplot2 ggsave
+##' @export
+ggplot2::ggsave
