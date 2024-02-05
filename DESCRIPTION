@@ -1,7 +1,7 @@
 Package: wikiprofiler
 Type: Package
 Title: 'WikiPathway' Based Data Integration and Visualization 
-Version: 0.1.2.002
+Version: 0.1.3
 Authors@R: c(
        person("Guangchuang", "Yu",     email = "guangchuangyu@gmail.com", role = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-6485-8781")),
        person("Yihao", "Chen",       email = "olivercyh@foxmail.com",      role = "aut")
@@ -19,4 +19,4 @@ ByteCompile: true
 License: Artistic-2.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.0

@@ -1,4 +1,4 @@
-# wikiprofiler 0.1.2.002
+# wikiprofiler 0.1.3
 
 + re-export `ggplot2::ggsave()` and it supports 'wpplot' object (2023-09-08, Fri)
 + `grid.draw()` method for 'wpplot' object (2023-09-08, Fri)
