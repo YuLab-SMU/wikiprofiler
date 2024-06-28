@@ -20,3 +20,4 @@ License: Artistic-2.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.0
+URL: https://github.com/YuLab-SMU/wikiprofiler
