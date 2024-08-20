@@ -17,6 +17,9 @@ Imports:
   yulab.utils
 ByteCompile: true
 License: Artistic-2.0
+URL: https://yulab-smu.top/contribution-knowledge-mining/
+BugReports: https://github.com/YuLab-SMU/wikiprofiler/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+

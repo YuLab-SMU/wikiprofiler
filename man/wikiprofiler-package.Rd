@@ -8,6 +8,14 @@
 \description{
 Queries online 'WikiPathway' graphics and allows mapping user data (e.g., expression values) on the graph. The package designs a grammar of graphic syntax that using pipe operator to add graphic layer.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://yulab-smu.top/contribution-knowledge-mining/}
+  \item Report bugs at \url{https://github.com/YuLab-SMU/wikiprofiler/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Guangchuang Yu \email{guangchuangyu@gmail.com} (\href{https://orcid.org/0000-0002-6485-8781}{ORCID}) [copyright holder]
 
