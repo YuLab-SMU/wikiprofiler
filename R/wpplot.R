@@ -4,10 +4,12 @@
 #' @return A 'wpplot' object
 #' @export
 #' @examples 
-#' wpplot('WP179') 
+#' if (yulab.utils::has_internet())
+#'    wpplot('WP179') 
 wpplot <- function(ID) {
   url0 <- 'https://www.wikipathways.org/wikipathways-assets/pathways'
   url <- sprintf("%s/%s/%s.svg", url0, ID, ID)
+
   svg <- yulab.utils::yread(url)
   if (!any(grepl('<svg', svg[1:10]))) {
     stop("fail to read online wiki pathway file")
