@@ -7,9 +7,8 @@
 #' if (yulab.utils::has_internet())
 #'    wpplot('WP179') 
 wpplot <- function(ID) {
-  url0 <- 'https://www.wikipathways.org/wikipathways-assets/pathways'
-  url <- sprintf("%s/%s/%s.svg", url0, ID, ID)
-
+  url <- paste0('https://www.wikipathways.org//wpi/wpi.php?action=',
+                'downloadFile&type=svg&pwTitle=Pathway:',ID)
   svg <- yulab.utils::yread(url)
   if (!any(grepl('<svg', svg[1:10]))) {
     stop("fail to read online wiki pathway file")
@@ -52,13 +51,13 @@ wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE, legend_x 
   colornum <- (maxi-mini) / 10
   
   colorbar <- colorb(value, low, high)
-  color <- colorbar[order(value)]  
-  legendcolor <- legend_generator(value, low, high)
+  color <- colorbar[order(value)] 
   
   genes <- names(value)
+  genes_key <- paste0(">",genes,"</text")
   
-  for (i in seq_along(genes)) {
-    pos <- grep(genes[i], p$svg)
+  for (i in seq_along(genes_key)) {
+    pos <- grep(genes_key[i], p$svg)
     p$svg <- replace_bg2(p$svg, pos, color[i])
   }
   
@@ -83,7 +82,7 @@ wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE, legend_x 
   scalelineX <- 27 + incrementX
   scalelineY <- seq(from = 2,to = 118,length.out = length(textele)) +incrementY
   
-  if(legend){
+  if(legend){  ## draw legend
     zero_scale_line <- find_zero_scale(value)
     proportion <- seq(from = 2,to = 118,length.out = length(textele)) / 120
     proportion <- proportion[length(which(pretty(value, 4) >= zero_scale_line))]
@@ -121,9 +120,10 @@ wp_shadowtext <- function(p, bg.r = 2, bg.col = "white") {
   if (is.null(p$geneExpr)) return(p)
   
   genes <- names(p$geneExpr)
+  genes_key <- paste0(">",genes,"</text")
   
-  for (i in seq_along(genes)) {
-    pos <- grep(genes[i], p$svg)
+  for (i in seq_along(genes_key)) {
+    pos <- grep(genes_key[i], p$svg)
     p$svg <- svg_halos(p$ svg, pos, genes[i])
   }
   
@@ -152,6 +152,7 @@ wp_shadowtext <- function(p, bg.r = 2, bg.col = "white") {
 #' @importFrom ggplot2 ggsave
 #' @export
 wpsave <- function(p, file, width=NULL, height=NULL, ...) {
+  writeLines(p$svg,con=file)
   # fileext <- sub(".*(\\..+)", "\\1", file)
   # f <- svg2tempfile(p$svg)
   # if (fileext == '.svg') {
@@ -164,15 +165,15 @@ wpsave <- function(p, file, width=NULL, height=NULL, ...) {
   #   stop("file type not supported")
   # }
   
-  g <- ggplotify::as.ggplot(p)
-  
-  ggplot2::ggsave(plot = g,
-    filename = file,
-    width = width,
-    height = height, 
-    ...)
-
-  invisible(p)
+  # g <- ggplotify::as.ggplot(p)
+  # 
+  # ggplot2::ggsave(plot = g,
+  #   filename = file,
+  #   width = width,
+  #   height = height, 
+  #   ...)
+  # 
+  # invisible(p)
 }
 
 
