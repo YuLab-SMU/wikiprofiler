@@ -16,6 +16,7 @@ A 'wpplot' object
 Use wikipathways ID to open a local svg file. Then extract related information from svg file and build a wpplot class variance.
 }
 \examples{
-if (yulab.utils::has_internet())
+\dontrun{
    wpplot('WP179') 
+}
 }

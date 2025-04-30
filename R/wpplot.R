@@ -4,8 +4,9 @@
 #' @return A 'wpplot' object
 #' @export
 #' @examples 
-#' if (yulab.utils::has_internet())
+#' \dontrun{
 #'    wpplot('WP179') 
+#' }
 wpplot <- function(ID) {
   url0 <- 'https://www.wikipathways.org/wikipathways-assets/pathways'
   url <- sprintf("%s/%s/%s.svg", url0, ID, ID)
