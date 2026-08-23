@@ -21,6 +21,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Guangchuang Yu \email{guangchuangyu@gmail.com} (\href{https://orcid.org/0000-0002-6485-8781}{ORCID}) [copyright holder]
   \item Yihao Chen \email{olivercyh@foxmail.com}
 }
 

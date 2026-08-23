@@ -1,10 +1,10 @@
 Package: wikiprofiler
 Type: Package
 Title: 'WikiPathway' Based Data Integration and Visualization 
-Version: 0.1.6
+Version: 0.1.7
 Authors@R: c(
-       person("Guangchuang", "Yu",     email = "guangchuangyu@gmail.com", role = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-6485-8781")),
-       person("Yihao", "Chen",       email = "olivercyh@foxmail.com",      role = "aut")
+       person("Guangchuang", "Yu", email = "guangchuangyu@gmail.com", role = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-6485-8781")),
+       person("Yihao", "Chen",     email = "olivercyh@foxmail.com",   role = "aut")
        )
 Description: Queries online 'WikiPathway' graphics and allows mapping user data (e.g., expression values) on the graph. The package designs a grammar of graphic syntax that using pipe operator to add graphic layer.
 Imports:
@@ -21,5 +21,4 @@ URL: https://yulab-smu.top/contribution-knowledge-mining/
 BugReports: https://github.com/YuLab-SMU/wikiprofiler/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
-
+Config/roxygen2/version: 8.0.0

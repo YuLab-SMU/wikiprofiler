@@ -1,10 +1,98 @@
 svg2tempfile <- function(svg) {
   f <- tempfile(fileext = ".svg")
-  cat(svg, file = f)
+    cat(svg, sep = "\n", file = f)
   return(f)
 }
 
 #' @import grDevices
+
+strip_svg_value <- function(x) {
+    suppressWarnings(as.numeric(sub("[^0-9.]+$", "", x)))
+}
+
+svg_attr_value <- function(line, attr) {
+    m <- regexec(sprintf('%s="([^"]+)"', attr), line)
+    hit <- regmatches(line, m)[[1]]
+    if (length(hit) < 2) {
+        return(NA_character_)
+    }
+    hit[2]
+}
+
+svg_dimensions <- function(svg) {
+    svg_line <- svg[grep("<svg", svg, fixed = TRUE)][1]
+    width <- svg_attr_value(svg_line, "width")
+    height <- svg_attr_value(svg_line, "height")
+
+    if (is.na(width) || is.na(height)) {
+        viewbox <- svg_attr_value(svg_line, "viewBox")
+        if (!is.na(viewbox)) {
+            parts <- strsplit(viewbox, "\\s+")[[1]]
+            if (length(parts) >= 4) {
+                if (is.na(width)) {
+                    width <- parts[3]
+                }
+                if (is.na(height)) {
+                    height <- parts[4]
+                }
+            }
+        }
+    }
+
+    c(width = strip_svg_value(width), height = strip_svg_value(height))
+}
+
+extract_svg_label <- function(line) {
+    if (grepl("<tspan", line, fixed = TRUE) && grepl("</tspan>", line, fixed = TRUE)) {
+        return(sub("</tspan>.*", "", sub(".*<tspan[^>]*>", "", line)))
+    }
+
+    if (grepl("<text", line, fixed = TRUE) && grepl("</text>", line, fixed = TRUE)) {
+        return(sub("</text>.*", "", sub(".*<text[^>]*>", "", line)))
+    }
+
+    NA_character_
+}
+
+find_gene_positions <- function(svg, gene) {
+    idx <- grep("<tspan", svg, fixed = TRUE)
+    if (length(idx) > 0) {
+        labels <- vapply(svg[idx], extract_svg_label, character(1))
+        hits <- idx[!is.na(labels) & labels == gene]
+        if (length(hits) > 0) {
+            return(hits)
+        }
+    }
+
+    idx <- grep("<text", svg, fixed = TRUE)
+    if (length(idx) > 0) {
+        labels <- vapply(svg[idx], extract_svg_label, character(1))
+        return(idx[!is.na(labels) & labels == gene])
+    }
+
+    integer(0)
+}
+
+find_node_rect <- function(svg, position) {
+    from <- max(1, position - 10)
+    idx <- grep("<rect", svg[from:position], fixed = TRUE)
+    if (length(idx) == 0) {
+        return(NA_integer_)
+    }
+    from + idx[length(idx)] - 1
+}
+
+replace_fill <- function(line, color) {
+    if (grepl('fill="', line, fixed = TRUE)) {
+        return(sub('fill="[^"]+"', sprintf('fill="%s"', color), line))
+    }
+
+    if (grepl("fill:", line, fixed = TRUE)) {
+        return(sub("fill:[^;\"']+", paste0("fill:", color), line))
+    }
+
+    line
+}
 
 colorb <- function(Expression, low = "blue", high = "red") {
   zero_scale_line <- find_zero_scale(Expression)
@@ -39,18 +127,33 @@ legend_generator <- function(value, low = "blue", high = "red") {
 }
 
 svg_halos <- function(svg, pos, gene) {
-  svg[pos - 1] <- paste(
-    sub(
-      "fill:black; stroke:none;",
-      "\" class=\"halo",
-      svg[pos - 1]
-    ),
-    sub(
-      "/>",
-      paste(">", gene, "</text>", sep = ""),
-      svg[pos - 1]
-    )
-  )
+    if (length(pos) == 0 || all(is.na(pos))) {
+      return(svg)
+    }
+
+    for (i in pos) {
+      if (grepl('class="halo"', svg[i], fixed = TRUE)) {
+        next
+      }
+
+      if (grepl("<tspan", svg[i], fixed = TRUE) && grepl("</tspan>", svg[i], fixed = TRUE)) {
+        svg[i] <- sub(
+          "(<tspan)([^>]*>)(.*)(</tspan>)",
+          "\\1 class=\"halo\"\\2\\3\\4\\1\\2\\3\\4",
+          svg[i]
+        )
+        next
+      }
+
+      if (grepl("<text", svg[i], fixed = TRUE) && grepl("</text>", svg[i], fixed = TRUE)) {
+        svg[i] <- sub(
+          "(<text)([^>]*>)(.*)(</text>)",
+          "\\1 class=\"halo\"\\2\\3\\4\\1\\2\\3\\4",
+          svg[i]
+        )
+      }
+    }
+
   return(svg)
 }
 
@@ -63,17 +166,12 @@ svg_halos2 <- function(svg, positions, gene) {
 }
 
 replace_bg <- function(svg, position, color) {
-  j <- rev(grep("<g", svg[1:position]))[1]
-  
-  replace <- sub(
-    "fill:.+;.+", paste("fill:", color,
-                        "; text-rendering:geometricPrecision; stroke:white;\"",
-                        sep = ""
-    ),
-    svg[j]
-  )
-  
-  svg[j] <- replace
+    j <- find_node_rect(svg, position)
+    if (is.na(j)) {
+      return(svg)
+    }
+
+    svg[j] <- replace_fill(svg[j], color)
   return(svg)
 }
 
@@ -88,4 +186,23 @@ replace_bg2 <- function(svg, positions, color) {
   }
   
   return(svg)
+}
+
+inject_halo_style <- function(svg, bg.col, bg.r) {
+    if (any(grepl(".halo{", svg, fixed = TRUE))) {
+      return(svg)
+    }
+
+    style <- sprintf(
+      "<style>.halo{fill:%s;stroke:%s;stroke-width:%s;stroke-linejoin:round;paint-order:stroke fill;vector-effect:non-scaling-stroke;}</style>",
+      bg.col,
+      bg.col,
+      bg.r
+    )
+    end <- grep("</svg", svg, fixed = TRUE)[1]
+    if (is.na(end)) {
+      return(c(svg, style))
+    }
+
+    append(svg, style, after = end - 1)
 }
