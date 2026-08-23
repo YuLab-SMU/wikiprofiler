@@ -18,7 +18,9 @@ wpplot <- function(ID) {
   structure(list(
     ID = ID,
     svg = svg,
-    geneExpr = NULL
+    geneExpr = NULL,
+    mapping_table = NULL,
+    comparison = NULL
   ), class = "wpplot")
 }
 
@@ -39,75 +41,42 @@ wp_bgfill <- function(p, value, high="red", low="blue", legend = TRUE, legend_x 
   if(legend_x < 0 || legend_x > 1 || legend_y < 0 || legend_y > 1){
     message('Parameters legend_x and legend_y must be numbers between 0 to 1!')
   }
-    positions <- lapply(names(value), function(gene) find_gene_positions(p$svg, gene))
-    matched <- lengths(positions) > 0
+  mapping_table <- attr(value, "mapping_table", exact = TRUE)
+  value <- normalize_wp_vector(value)
+  positions <- lapply(names(value), function(gene) find_gene_positions(p$svg, gene))
+  matched <- lengths(positions) > 0
 
-    if(!any(matched)){
+  if(!any(matched)){
     message("Please make sure the input gene ID type is 'SYMBOL'")
     return(p)
   }
-    value <- value[matched]
-    positions <- positions[matched]
-  
-  mini <- min(value) %/% 10 * 10
-  maxi <- ceiling(max(value)/10) * 10
-  colornum <- (maxi-mini) / 10
+  value <- value[matched]
+  positions <- positions[matched]
+  if (!is.null(mapping_table)) {
+    mapping_table <- mapping_table[mapping_table$symbol %in% names(value), , drop = FALSE]
+  }
   
   colorbar <- colorb(value, low, high)
   color <- colorbar[order(value)]  
-  legendcolor <- legend_generator(value, low, high)
   
   genes <- names(value)
   
   for (i in seq_along(genes)) {
-      p$svg <- replace_bg2(p$svg, positions[[i]], color[i])
+    p$svg <- replace_bg2(p$svg, positions[[i]], color[i])
   }
-  
-    dims <- svg_dimensions(p$svg)
-    svg_width <- dims[["width"]]
-    svg_height <- dims[["height"]]
-  
-  incrementX <- svg_width * legend_x
-  incrementY <- svg_height * (1 - legend_y)
-  if(incrementX > svg_width - 48)
-    incrementX <- svg_width - 48
-  
-  if(incrementY > svg_height - 122){
-    incrementY <- svg_height - 122
-  }else if(incrementY < 3)
-    incrementY <- 3
-  
-  textele <- rev(pretty(value, 4))  
-  legendX <- 0 + incrementX
-  legendY <- 0 + incrementY
-  textX <- 40 + incrementX
-  textY <- seq(from = 5,to = 120,length.out = length(textele)) + incrementY
-  scalelineX <- 27 + incrementX
-  scalelineY <- seq(from = 2,to = 118,length.out = length(textele)) +incrementY
   
   if(legend){
-    zero_scale_line <- find_zero_scale(value)
-    proportion <- seq(from = 2,to = 118,length.out = length(textele)) / 120
-    proportion <- proportion[length(which(pretty(value, 4) >= zero_scale_line))]
-    if(max(pretty(value, 4)) == 0){
-      proportion <- '0%'
-    }
-    if(min(pretty(value, 4)) == 0){
-      proportion <- '100%'
-    }
-    temp<-grep("</svg",p$svg)
-    p$svg[temp]<-sub("</svg",paste("<defs><linearGradient id=\"grad1\" x1=\"0%\" y1=\"0%\" x2=\"0%\" y2=\"100%\"><stop offset=\"0%\" style=\"stop-color:",high,";stop-opacity:1\"></stop><stop offset=\"",proportion,"\" style=\"stop-color:","white",";stop-opacity:1\"></stop><stop offset=\"100%\" style=\"stop-color:",low,";stop-opacity:1\"></stop></linearGradient></defs><rect x=\"",legendX,"\" y=\"",legendY,"\" width =\"30\" height=\"120\" style=\"fill:url(#grad1 );stroke-width:0;stroke:black\"></rect></svg",sep = ""),p$svg[temp])
-    
-    for (i in 1:length(pretty(value, 4))){
-      temp<-grep("</svg",p$svg)
-      p$svg[temp]<-sub("</svg",paste("<text x=\"",textX,"\" y=\"",textY[i],"\" style=\"font-size:10; fill:black; stroke:none\">",textele[i],"</text></svg",sep = ""),p$svg[temp])
-    }
-    for (i in 1:length(pretty(value, 4))){
-      temp<-grep("</svg",p$svg)
-      p$svg[temp]<-sub("</svg",paste("<rect width=\"3\" height=\"1\" x=\"",scalelineX,"\" y=\"",scalelineY[i],"\" style=\"fill:white; stroke:none\"></rect></svg",sep = ""),p$svg[temp])
-    }
+    p$svg <- append_wp_legend(
+      svg = p$svg,
+      value = value,
+      high = high,
+      low = low,
+      legend_x = legend_x,
+      legend_y = legend_y
+    )
   }
   p$geneExpr <- value
+  p$mapping_table <- mapping_table
   return(p)
 }
 

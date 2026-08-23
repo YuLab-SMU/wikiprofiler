@@ -13,6 +13,7 @@ Imports:
   grDevices,
   grid,
   gson,
+  methods,
   rsvg,
   yulab.utils (>= 0.1.7)
 ByteCompile: true
