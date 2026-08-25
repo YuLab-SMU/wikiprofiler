@@ -123,7 +123,12 @@ wp_comparefill <- function(p,
 #' @param control Optional symbol-keyed control values for comparison rendering.
 #' @param n Maximum number of pathway IDs to render.
 #' @param id_col Column name that stores pathway IDs.
+#' @param name_col Optional column name used for output file naming when
+#' `pathway` is a data.frame or an enrichment-like result table.
 #' @param dir Optional output directory. When provided, PNG files are written there.
+#' @param file_ext Output file extension(s) passed to `wpsave()`.
+#' @param filename_template Output filename template. Supported placeholders:
+#' `{index}`, `{id}`, and `{name}`.
 #' @param width Width passed to `wpsave()`.
 #' @param height Height passed to `wpsave()`.
 #' @param shadowtext Whether to add halo text after fill rendering.
@@ -143,7 +148,10 @@ wp_render <- function(pathway,
                       control = NULL,
                       n = NULL,
                       id_col = "ID",
+                      name_col = NULL,
                       dir = NULL,
+                      file_ext = "png",
+                      filename_template = "{id}",
                       width = NULL,
                       height = NULL,
                       shadowtext = FALSE,
@@ -157,16 +165,22 @@ wp_render <- function(pathway,
                       legend_x = 0.001,
                       legend_y = 0.94) {
   mode <- match.arg(mode)
-  ids <- extract_wp_ids(pathway, id_col = id_col, n = n)
-  plots <- vector("list", length(ids))
-  names(plots) <- ids
+  targets <- extract_wp_targets(
+    pathway = pathway,
+    id_col = id_col,
+    name_col = name_col,
+    n = n
+  )
+  file_ext <- unique(as.character(file_ext))
+  plots <- vector("list", nrow(targets))
+  names(plots) <- targets$id
 
   if (!is.null(dir) && !dir.exists(dir)) {
     dir.create(dir, recursive = TRUE, showWarnings = FALSE)
   }
 
-  for (i in seq_along(ids)) {
-    p <- wpplot(ids[i])
+  for (i in seq_len(nrow(targets))) {
+    p <- wpplot(targets$id[i])
     if (!is.null(control)) {
       p <- wp_comparefill(
         p = p,
@@ -197,12 +211,20 @@ wp_render <- function(pathway,
     }
 
     if (!is.null(dir)) {
-      wpsave(
-        p = p,
-        file = file.path(dir, paste0(ids[i], ".png")),
-        width = width,
-        height = height
+      output_stub <- build_wp_output_stub(
+        index = targets$index[i],
+        id = targets$id[i],
+        name = targets$name[i],
+        filename_template = filename_template
       )
+      for (ext in file_ext) {
+        wpsave(
+          p = p,
+          file = file.path(dir, paste0(output_stub, ".", ext)),
+          width = width,
+          height = height
+        )
+      }
     }
 
     plots[[i]] <- p
@@ -358,6 +380,10 @@ normalize_wp_vector <- function(x, arg = "value") {
 }
 
 extract_wp_ids <- function(pathway, id_col = "ID", n = NULL) {
+  extract_wp_targets(pathway = pathway, id_col = id_col, n = n)$id
+}
+
+extract_wp_targets <- function(pathway, id_col = "ID", name_col = NULL, n = NULL) {
   has_result_slot <- FALSE
   slot_names <- tryCatch(
     methods::slotNames(pathway),
@@ -368,28 +394,42 @@ extract_wp_ids <- function(pathway, id_col = "ID", n = NULL) {
   }
 
   if (is.character(pathway)) {
-    ids <- pathway
+    table <- data.frame(
+      id = as.character(pathway),
+      name = as.character(pathway),
+      stringsAsFactors = FALSE
+    )
   } else if (is.data.frame(pathway)) {
     if (!id_col %in% names(pathway)) {
       stop("'", id_col, "' column was not found in 'pathway'.")
     }
-    ids <- pathway[[id_col]]
+    table <- data.frame(
+      id = as.character(pathway[[id_col]]),
+      name = extract_wp_target_names(pathway, name_col = name_col, fallback = pathway[[id_col]]),
+      stringsAsFactors = FALSE
+    )
   } else if (has_result_slot) {
     result <- methods::slot(pathway, "result")
     if (!is.data.frame(result) || !id_col %in% names(result)) {
       stop("The S4 object's 'result' slot must contain an '", id_col, "' column.")
     }
-    ids <- result[[id_col]]
+    table <- data.frame(
+      id = as.character(result[[id_col]]),
+      name = extract_wp_target_names(result, name_col = name_col, fallback = result[[id_col]]),
+      stringsAsFactors = FALSE
+    )
   } else {
     stop("'pathway' must be a character vector, data.frame, or enrichment-like S4 object.")
   }
 
-  ids <- unique(as.character(ids))
-  ids <- ids[!is.na(ids) & nzchar(ids)]
+  keep <- !is.na(table$id) & nzchar(table$id)
+  table <- table[keep, , drop = FALSE]
+  table <- table[!duplicated(table$id), , drop = FALSE]
   if (!is.null(n)) {
-    ids <- head(ids, n)
+    table <- head(table, n)
   }
-  ids
+  table$index <- seq_len(nrow(table))
+  table
 }
 
 append_svg_elements <- function(svg, elements) {
@@ -407,6 +447,70 @@ append_wp_legend <- function(svg,
                              low = "blue",
                              legend_x = 0.001,
                              legend_y = 0.94) {
+  layout <- resolve_wp_legend_layout(
+    svg = svg,
+    legend_x = legend_x,
+    legend_y = legend_y
+  )
+  breaks <- resolve_wp_legend_breaks(value)
+  elements <- c(
+    build_wp_legend_gradient(
+      x = layout$legend_x,
+      y = layout$legend_y,
+      proportion = breaks$proportion,
+      high = high,
+      low = low
+    ),
+    build_wp_legend_labels(
+      x = layout$text_x,
+      y = breaks$text_y + layout$legend_y,
+      labels = breaks$labels
+    ),
+    build_wp_legend_ticks(
+      x = layout$scaleline_x,
+      y = breaks$scaleline_y + layout$legend_y
+    )
+  )
+
+  append_svg_elements(svg, elements)
+}
+
+extract_wp_target_names <- function(data, name_col = NULL, fallback) {
+  if (!is.null(name_col)) {
+    if (!name_col %in% names(data)) {
+      stop("'", name_col, "' column was not found in pathway data.")
+    }
+    labels <- data[[name_col]]
+  } else {
+    labels <- fallback
+  }
+
+  labels <- as.character(labels)
+  labels[is.na(labels) | !nzchar(labels)] <- as.character(fallback)[is.na(labels) | !nzchar(labels)]
+  labels
+}
+
+build_wp_output_stub <- function(index, id, name, filename_template = "{id}") {
+  output_name <- filename_template
+  output_name <- gsub("\\{index\\}", as.character(index), output_name)
+  output_name <- gsub("\\{id\\}", as.character(id), output_name)
+  output_name <- gsub("\\{name\\}", as.character(name), output_name)
+  sanitize_wp_filename(output_name)
+}
+
+sanitize_wp_filename <- function(x) {
+  x <- gsub("[\\\\/:*?\"<>|]+", "_", x)
+  x <- gsub("\\s+", "_", x)
+  x <- gsub("_+", "_", x)
+  x <- sub("^_+", "", x)
+  x <- sub("_+$", "", x)
+  if (!nzchar(x)) {
+    return("wpplot")
+  }
+  x
+}
+
+resolve_wp_legend_layout <- function(svg, legend_x = 0.001, legend_y = 0.94) {
   dims <- svg_dimensions(svg)
   svg_width <- dims[["width"]]
   svg_height <- dims[["height"]]
@@ -416,21 +520,27 @@ append_wp_legend <- function(svg,
   if (incrementX > svg_width - 48) {
     incrementX <- svg_width - 48
   }
-
   if (incrementY > svg_height - 122) {
     incrementY <- svg_height - 122
   } else if (incrementY < 3) {
     incrementY <- 3
   }
 
-  textele <- rev(pretty(value, 4))
-  textX <- 40 + incrementX
-  textY <- seq(from = 5, to = 120, length.out = length(textele)) + incrementY
-  scalelineX <- 27 + incrementX
-  scalelineY <- seq(from = 2, to = 118, length.out = length(textele)) + incrementY
+  list(
+    legend_x = incrementX,
+    legend_y = incrementY,
+    text_x = 40 + incrementX,
+    scaleline_x = 27 + incrementX
+  )
+}
+
+resolve_wp_legend_breaks <- function(value) {
+  labels <- rev(pretty(value, 4))
+  text_y <- seq(from = 5, to = 120, length.out = length(labels))
+  scaleline_y <- seq(from = 2, to = 118, length.out = length(labels))
 
   zero_scale_line <- find_zero_scale(value)
-  proportion <- seq(from = 2, to = 118, length.out = length(textele)) / 120
+  proportion <- seq(from = 2, to = 118, length.out = length(labels)) / 120
   proportion <- proportion[length(which(pretty(value, 4) >= zero_scale_line))]
   if (max(pretty(value, 4)) == 0) {
     proportion <- "0%"
@@ -439,32 +549,43 @@ append_wp_legend <- function(svg,
     proportion <- "100%"
   }
 
-  elements <- c(
-    paste(
-      "<defs><linearGradient id=\"grad1\" x1=\"0%\" y1=\"0%\" x2=\"0%\" y2=\"100%\">",
-      "<stop offset=\"0%\" style=\"stop-color:", high, ";stop-opacity:1\"></stop>",
-      "<stop offset=\"", proportion, "\" style=\"stop-color:white;stop-opacity:1\"></stop>",
-      "<stop offset=\"100%\" style=\"stop-color:", low, ";stop-opacity:1\"></stop>",
-      "</linearGradient></defs>",
-      "<rect x=\"", incrementX, "\" y=\"", incrementY,
-      "\" width=\"30\" height=\"120\" style=\"fill:url(#grad1 );stroke-width:0;stroke:black\"></rect>",
-      sep = ""
-    ),
-    paste(
-      "<text x=\"", textX,
-      "\" y=\"", textY,
-      "\" style=\"font-size:10; fill:black; stroke:none\">",
-      textele,
-      "</text>",
-      sep = ""
-    ),
-    paste(
-      "<rect width=\"3\" height=\"1\" x=\"", scalelineX,
-      "\" y=\"", scalelineY,
-      "\" style=\"fill:white; stroke:none\"></rect>",
-      sep = ""
-    )
+  list(
+    labels = labels,
+    text_y = text_y,
+    scaleline_y = scaleline_y,
+    proportion = proportion
   )
+}
 
-  append_svg_elements(svg, elements)
+build_wp_legend_gradient <- function(x, y, proportion, high = "red", low = "blue") {
+  paste(
+    "<defs><linearGradient id=\"grad1\" x1=\"0%\" y1=\"0%\" x2=\"0%\" y2=\"100%\">",
+    "<stop offset=\"0%\" style=\"stop-color:", high, ";stop-opacity:1\"></stop>",
+    "<stop offset=\"", proportion, "\" style=\"stop-color:white;stop-opacity:1\"></stop>",
+    "<stop offset=\"100%\" style=\"stop-color:", low, ";stop-opacity:1\"></stop>",
+    "</linearGradient></defs>",
+    "<rect x=\"", x, "\" y=\"", y,
+    "\" width=\"30\" height=\"120\" style=\"fill:url(#grad1 );stroke-width:0;stroke:black\"></rect>",
+    sep = ""
+  )
+}
+
+build_wp_legend_labels <- function(x, y, labels) {
+  paste(
+    "<text x=\"", x,
+    "\" y=\"", y,
+    "\" style=\"font-size:10; fill:black; stroke:none\">",
+    labels,
+    "</text>",
+    sep = ""
+  )
+}
+
+build_wp_legend_ticks <- function(x, y) {
+  paste(
+    "<rect width=\"3\" height=\"1\" x=\"", x,
+    "\" y=\"", y,
+    "\" style=\"fill:white; stroke:none\"></rect>",
+    sep = ""
+  )
 }

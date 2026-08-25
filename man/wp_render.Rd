@@ -10,7 +10,10 @@ wp_render(
   control = NULL,
   n = NULL,
   id_col = "ID",
+  name_col = NULL,
   dir = NULL,
+  file_ext = "png",
+  filename_template = "{id}",
   width = NULL,
   height = NULL,
   shadowtext = FALSE,
@@ -36,7 +39,15 @@ wp_render(
 
 \item{id_col}{Column name that stores pathway IDs.}
 
+\item{name_col}{Optional column name used for output file naming when
+\code{pathway} is a data.frame or an enrichment-like result table.}
+
 \item{dir}{Optional output directory. When provided, PNG files are written there.}
+
+\item{file_ext}{Output file extension(s) passed to \code{wpsave()}.}
+
+\item{filename_template}{Output filename template. Supported placeholders:
+\code{{index}}, \code{{id}}, and \code{{name}}.}
 
 \item{width}{Width passed to \code{wpsave()}.}
 
