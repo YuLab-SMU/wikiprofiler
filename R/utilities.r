@@ -42,6 +42,23 @@ svg_dimensions <- function(svg) {
     c(width = strip_svg_value(width), height = strip_svg_value(height))
 }
 
+svg_user_dimensions <- function(svg) {
+    svg_line <- svg[grep("<svg", svg, fixed = TRUE)][1]
+    viewbox <- svg_attr_value(svg_line, "viewBox")
+
+    if (!is.na(viewbox)) {
+        parts <- strsplit(viewbox, "\\s+")[[1]]
+        if (length(parts) >= 4) {
+            return(c(
+                width = suppressWarnings(as.numeric(parts[3])),
+                height = suppressWarnings(as.numeric(parts[4]))
+            ))
+        }
+    }
+
+    svg_dimensions(svg)
+}
+
 extract_svg_label <- function(line) {
     if (grepl("<tspan", line, fixed = TRUE) && grepl("</tspan>", line, fixed = TRUE)) {
         return(sub("</tspan>.*", "", sub(".*<tspan[^>]*>", "", line)))

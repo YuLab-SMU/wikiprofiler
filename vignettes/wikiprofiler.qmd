@@ -1,0 +1,298 @@
+---
+title: "Visualizing pathway-level data with wikiprofiler"
+format: html
+execute:
+  warning: false
+  message: false
+vignette: >
+  %\VignetteIndexEntry{Visualizing pathway-level data with wikiprofiler}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r}
+#| include: false
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 11,
+  fig.height = 7,
+  dpi = 144,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Overview
+
+`wikiprofiler` is designed around a pipe-friendly grammar for pathway graphics. The core idea is simple: start with a pathway plot, add a data-mapping layer, and then add optional visual refinements. The newer APIs extend that same design upstream and downstream: `wp_map()` prepares data before plotting, `wp_comparefill()` adds a comparison layer, and `wp_render()` scales the workflow to pathway batches.
+
+This vignette walks through the current workflow in English, with the `wp_*` functions written in a pipe-oriented style whenever composition makes sense.
+
+## Setup
+
+```{r}
+library(wikiprofiler)
+library(clusterProfiler)
+library(DOSE)
+library(org.Hs.eg.db)
+library(knitr)
+```
+
+## A minimal input object
+
+The example below uses `DOSE::geneList` together with `clusterProfiler::enrichWP()` so that the same objects can be reused across the basic plotting, comparison plotting, and batch rendering sections.
+
+```{r}
+data(geneList, package = "DOSE")
+
+de <- names(geneList)[1:100]
+wp_res <- enrichWP(de, organism = "Homo sapiens")
+wp_tbl <- as.data.frame(wp_res)
+
+de_symbol <- bitr(
+  de,
+  fromType = "ENTREZID",
+  toType = "SYMBOL",
+  OrgDb = "org.Hs.eg.db"
+)
+
+value <- stats::setNames(geneList[de_symbol[, 1]], de_symbol[, 2])
+pathway_id <- wp_tbl$ID[1]
+
+kable(head(wp_tbl[, c("ID", "Description", "p.adjust")], 5), digits = 4)
+```
+
+## Build a single pathway plot with pipes
+
+The most direct workflow starts with `wpplot()`, adds a fill layer with `wp_bgfill()`, and then improves label readability with `wp_shadowtext()`.
+
+```{r}
+wpplot(pathway_id) |>
+  wp_bgfill(
+    value = value,
+    low = "darkgreen",
+    high = "firebrick",
+    legend_x = 0.88,
+    legend_y = 0.95
+  ) |>
+  wp_shadowtext(bg.r = 2, bg.col = "white")
+```
+
+If you want to save the final plot, keep the piped object and pass it to `wpsave()`.
+
+```{r}
+p_single <- wpplot(pathway_id) |>
+  wp_bgfill(
+    value = value,
+    low = "darkgreen",
+    high = "firebrick",
+    legend_x = 0.88,
+    legend_y = 0.95
+  ) |>
+  wp_shadowtext()
+
+single_png <- file.path(tempdir(), "wikiprofiler-single-demo.png")
+wpsave(p_single, single_png, width = 11, height = 7)
+single_png
+```
+
+## Prepare plotting values with `wp_map()`
+
+`wp_bgfill()` expects a named numeric vector keyed by gene symbol. In real analyses, that is often not the format you start with. `wp_map()` fills that gap by:
+
+- mapping identifiers such as `ENTREZID` to `SYMBOL`
+- aggregating duplicated rows that end up at the same symbol
+
+The next example intentionally duplicates part of the table so that the aggregation step is visible.
+
+```{r}
+expr_tbl <- de_symbol[1:40, c("ENTREZID", "SYMBOL")]
+expr_tbl$score <- unname(geneList[expr_tbl$ENTREZID])
+
+expr_tbl_dup <- expr_tbl[1:10, ]
+expr_tbl_dup$score <- expr_tbl_dup$score * 0.5
+expr_tbl2 <- rbind(expr_tbl, expr_tbl_dup)
+
+mapped_value <- wp_map(
+  expr_tbl2,
+  value_col = "score",
+  id_col = "ENTREZID",
+  mapping = de_symbol[, c("ENTREZID", "SYMBOL")],
+  mapping_from = "ENTREZID",
+  mapping_to = "SYMBOL",
+  aggregator = "mean"
+)
+
+head(mapped_value, 10)
+```
+
+`wp_map()` also stores a mapping table as an attribute so that you can inspect how each symbol-level value was produced.
+
+```{r}
+mapping_table <- attr(mapped_value, "mapping_table")
+kable(head(mapping_table, 10), digits = 4)
+```
+
+Once the values are prepared, they drop directly into the same pipe-oriented plotting workflow.
+
+```{r}
+wpplot(pathway_id) |>
+  wp_bgfill(
+    value = mapped_value,
+    low = "navy",
+    high = "goldenrod",
+    legend_x = 0.88,
+    legend_y = 0.95
+  ) |>
+  wp_shadowtext()
+```
+
+## Compare two conditions with `wp_comparefill()`
+
+When both conditions are already represented as named numeric vectors keyed by symbol, `wp_comparefill()` computes the comparison values and reuses the same plotting grammar.
+
+Here the second condition is simulated from `mapped_value` only to illustrate the API. The point is the workflow shape, not the biology of this toy example.
+
+```{r}
+control_value <- mapped_value
+case_value <- mapped_value + rep(c(-0.6, 0.9), length.out = length(mapped_value))
+
+p_compare <- wpplot(pathway_id) |>
+  wp_comparefill(
+    value = case_value,
+    control = control_value,
+    mode = "difference",
+    low = "steelblue4",
+    high = "darkorange2",
+    legend_x = 0.88,
+    legend_y = 0.95
+  ) |>
+  wp_shadowtext()
+
+p_compare
+```
+
+The comparison table is stored on the returned `wpplot` object.
+
+```{r}
+kable(head(p_compare$comparison, 10), digits = 4)
+```
+
+If you prefer ratio-based contrasts, switch the mode to `log2_ratio`.
+
+```{r}
+#| eval: false
+wpplot(pathway_id) |>
+  wp_comparefill(
+    value = case_value,
+    control = control_value,
+    mode = "log2_ratio",
+    pseudocount = 1
+  ) |>
+  wp_shadowtext()
+```
+
+## Render multiple pathways with `wp_render()`
+
+`wp_render()` is the batch entry point. It accepts pathway IDs directly, a `data.frame`, or an enrichment-like S4 object with a `result` slot. It can return a named list of `wpplot` objects, write files to disk, or do both.
+
+The example below renders the top two enriched pathways and writes them with a filename template that combines rank, pathway ID, and pathway name.
+
+```{r}
+batch_dir <- file.path(tempdir(), "wikiprofiler-batch-demo")
+if (dir.exists(batch_dir)) {
+  unlink(batch_dir, recursive = TRUE)
+}
+
+batch_plots <- wp_render(
+  pathway = wp_tbl[, c("ID", "Description")],
+  value = mapped_value,
+  n = 2,
+  name_col = "Description",
+  dir = batch_dir,
+  file_ext = "png",
+  filename_template = "{index}_{id}_{name}",
+  shadowtext = TRUE,
+  width = 11,
+  height = 7
+)
+
+batch_files <- list.files(batch_dir, full.names = TRUE)
+batch_files
+```
+
+The returned object is still useful even when you also export files.
+
+```{r}
+names(batch_plots)
+```
+
+To work entirely in memory, omit `dir`.
+
+```{r}
+#| eval: false
+plots <- wp_render(
+  pathway = wp_res,
+  value = mapped_value,
+  n = 6,
+  shadowtext = TRUE
+)
+```
+
+## A typical analysis pattern
+
+In practice, the workflow often looks like this:
+
+```{r}
+#| eval: false
+wp_res <- enrichWP(gene_ids, organism = "Homo sapiens")
+
+mapped_value <- wp_map(
+  expr_table,
+  value_col = "logFC",
+  id_col = "ENTREZID",
+  mapping = id_map,
+  mapping_from = "ENTREZID",
+  mapping_to = "SYMBOL",
+  aggregator = "mean"
+)
+
+plots <- wp_render(
+  pathway = wp_res,
+  value = mapped_value,
+  n = 6,
+  dir = "wp_batch",
+  name_col = "Description",
+  filename_template = "{index}_{id}_{name}",
+  shadowtext = TRUE
+)
+```
+
+For two-condition analyses, pass both `value` and `control`.
+
+```{r}
+#| eval: false
+plots <- wp_render(
+  pathway = wp_res,
+  value = case_value,
+  control = control_value,
+  n = 6,
+  dir = "wp_compare_batch",
+  name_col = "Description",
+  filename_template = "{index}_{id}_{name}",
+  shadowtext = TRUE
+)
+```
+
+## Summary
+
+The package now exposes a clearer layered workflow:
+
+- `wpplot()` starts a pathway graphic
+- `wp_bgfill()` and `wp_shadowtext()` add visual layers
+- `wp_map()` prepares data for plotting
+- `wp_comparefill()` adds condition-to-condition contrasts
+- `wp_render()` scales the same grammar to pathway batches
+
+The important part is that the plotting grammar still reads from left to right. The newer APIs do not replace that design; they make the same modular approach easier to use in real analysis pipelines.

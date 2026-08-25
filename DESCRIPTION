@@ -1,12 +1,16 @@
 Package: wikiprofiler
 Type: Package
-Title: 'WikiPathway' Based Data Integration and Visualization 
+Title: Data Integration and Visualization on 'WikiPathways' Graphics
 Version: 0.1.7
 Authors@R: c(
        person("Guangchuang", "Yu", email = "guangchuangyu@gmail.com", role = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-6485-8781")),
        person("Yihao", "Chen",     email = "olivercyh@foxmail.com",   role = "aut")
        )
-Description: Queries online 'WikiPathway' graphics and allows mapping user data (e.g., expression values) on the graph. The package designs a grammar of graphic syntax that using pipe operator to add graphic layer.
+Description: Retrieves pathway graphics from 'WikiPathways' and maps
+    user-supplied quantitative data, such as gene expression values, onto
+    pathway nodes. Provides a pipe-friendly grammar for building pathway
+    visualizations with layered fills, text highlighting, condition-wise
+    comparisons, data preparation helpers, and batch rendering utilities.
 Imports:
   ggplot2,
   ggplotify,
@@ -16,6 +20,14 @@ Imports:
   methods,
   rsvg,
   yulab.utils (>= 0.1.7)
+Suggests:
+  clusterProfiler,
+  DOSE,
+  knitr,
+  org.Hs.eg.db,
+  quarto,
+  rmarkdown
+VignetteBuilder: quarto
 ByteCompile: true
 License: Artistic-2.0
 URL: https://yulab-smu.top/contribution-knowledge-mining/

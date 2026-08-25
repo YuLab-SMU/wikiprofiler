@@ -447,12 +447,13 @@ append_wp_legend <- function(svg,
                              low = "blue",
                              legend_x = 0.001,
                              legend_y = 0.94) {
+  breaks <- resolve_wp_legend_breaks(value)
   layout <- resolve_wp_legend_layout(
     svg = svg,
+    labels = breaks$labels,
     legend_x = legend_x,
     legend_y = legend_y
   )
-  breaks <- resolve_wp_legend_breaks(value)
   elements <- c(
     build_wp_legend_gradient(
       x = layout$legend_x,
@@ -510,15 +511,20 @@ sanitize_wp_filename <- function(x) {
   x
 }
 
-resolve_wp_legend_layout <- function(svg, legend_x = 0.001, legend_y = 0.94) {
-  dims <- svg_dimensions(svg)
+resolve_wp_legend_layout <- function(svg,
+                                     labels,
+                                     legend_x = 0.001,
+                                     legend_y = 0.94) {
+  dims <- svg_user_dimensions(svg)
   svg_width <- dims[["width"]]
   svg_height <- dims[["height"]]
+  label_width <- estimate_wp_label_width(labels)
+  legend_width <- 30 + 10 + 3 + 10 + label_width
 
   incrementX <- svg_width * legend_x
   incrementY <- svg_height * (1 - legend_y)
-  if (incrementX > svg_width - 48) {
-    incrementX <- svg_width - 48
+  if (incrementX > svg_width - legend_width) {
+    incrementX <- svg_width - legend_width
   }
   if (incrementY > svg_height - 122) {
     incrementY <- svg_height - 122
@@ -532,6 +538,14 @@ resolve_wp_legend_layout <- function(svg, legend_x = 0.001, legend_y = 0.94) {
     text_x = 40 + incrementX,
     scaleline_x = 27 + incrementX
   )
+}
+
+estimate_wp_label_width <- function(labels) {
+  if (!length(labels)) {
+    return(48)
+  }
+
+  max(48, max(nchar(as.character(labels)), na.rm = TRUE) * 7)
 }
 
 resolve_wp_legend_breaks <- function(value) {

@@ -4,9 +4,9 @@
 \name{wikiprofiler-package}
 \alias{wikiprofiler}
 \alias{wikiprofiler-package}
-\title{wikiprofiler: 'WikiPathway' Based Data Integration and Visualization}
+\title{wikiprofiler: Data Integration and Visualization on 'WikiPathways' Graphics}
 \description{
-Queries online 'WikiPathway' graphics and allows mapping user data (e.g., expression values) on the graph. The package designs a grammar of graphic syntax that using pipe operator to add graphic layer.
+Retrieves pathway graphics from 'WikiPathways' and maps user-supplied quantitative data, such as gene expression values, onto pathway nodes. Provides a pipe-friendly grammar for building pathway visualizations with layered fills, text highlighting, condition-wise comparisons, data preparation helpers, and batch rendering utilities.
 }
 \seealso{
 Useful links:
